@@ -103,6 +103,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Bypassing TanStack's broken links array */}
+        <link rel="icon" href="/favicon.ico" />
       </head>
       <body>
         {children}
