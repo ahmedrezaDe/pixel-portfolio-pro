@@ -118,7 +118,7 @@ export const portfolioConfig: PortfolioConfig = {
         key: "linkedin",
         name: "LinkedIn",
         handle: "/in/erza",
-        href: "https://linkedin.com",
+        href: "https://linkedin.com/in/ahmed-reza-a3b9403b0",
         bg: "#0a66c2",
       },
       {
