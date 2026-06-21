@@ -27,6 +27,18 @@ export function Terminal() {
 
   const print = (lines: Line[]) => setHistory((h) => [...h, ...lines]);
 
+  // Reusable helper to simulate typing out a log array line-by-line
+  const simulateLog = async (logArray: string[]) => {
+    setRunning(true);
+    for (const ln of logArray) {
+      await new Promise((r) => setTimeout(r, 220));
+      sfx.type(muted);
+      print([{ kind: "out", text: ln }]);
+    }
+    addXp(15, "terminal-run");
+    setRunning(false);
+  };
+
   const exec = async (raw: string) => {
     const cmd = raw.trim().toLowerCase();
     print([{ kind: "in", text: `> ${raw}` }]);
@@ -42,17 +54,18 @@ export function Terminal() {
         T.skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })),
       );
     }
+    
+    // Automation Script Execution Commands
     if (cmd === "run project" || cmd === "run") {
-      setRunning(true);
-      for (const ln of T.runProjectLog) {
-        await new Promise((r) => setTimeout(r, 220));
-        sfx.type(muted);
-        print([{ kind: "out", text: ln }]);
-      }
-      addXp(15, "terminal-run");
-      setRunning(false);
-      return;
+      return simulateLog(T.runProjectLog);
     }
+    if (cmd === "run-scraper") {
+      return simulateLog(T.runScraperLog);
+    }
+    if (cmd === "system-check") {
+      return simulateLog(T.systemCheckLog);
+    }
+
     if (cmd === "secret") {
       toggleSecretTheme();
       addXp(75, "secret");
