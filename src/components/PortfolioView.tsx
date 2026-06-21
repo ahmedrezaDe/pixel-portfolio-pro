@@ -93,12 +93,13 @@ function ProjectOverlay({
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.7, y: 40, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.85, y: 30, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
-        className="my-8 w-full max-w-4xl overflow-hidden rounded-md border-2 border-[var(--ink)] bg-white pixel-box-lg"
+        className="pixel-box-lg my-8 w-full max-w-4xl overflow-hidden rounded-md border-2 border-[var(--ink)] bg-white"
+        style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
       >
         {/* Header */}
         <div
