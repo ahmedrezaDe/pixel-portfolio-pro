@@ -1,6 +1,9 @@
 import { motion } from "motion/react";
+import { portfolioConfig } from "@/lib/portfolioConfig";
 
 export function AboutView() {
+  const { about } = portfolioConfig;
+
   return (
     <div className="min-h-screen bg-white px-6 pb-24 pt-32 sm:px-12">
       <div className="mx-auto max-w-3xl">
@@ -10,42 +13,28 @@ export function AboutView() {
           transition={{ duration: 0.4 }}
         >
           <div className="mb-4 font-pixel text-[10px] uppercase tracking-widest text-[var(--accent-purple)]">
-            ◤ Player Bio
+            {about.pretitle}
           </div>
           <h1 className="font-display text-5xl leading-[1.05] tracking-tight text-[var(--ink)] sm:text-7xl">
-            Hi, my name is{" "}
-            <span className="text-[var(--accent-purple)]">Ahmed Reza</span>.
+            {about.headlineLead}{" "}
+            <span className="text-[var(--accent-purple)]">
+              {about.headlineHighlight}
+            </span>
+            .
           </h1>
           <p className="mt-6 font-pixel text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-            But you can call me Erza.
+            {about.aliasLine}
           </p>
 
           <div className="mt-12 grid gap-8 text-lg leading-relaxed text-[var(--ink)] sm:text-xl">
-            <p>
-              I make cool sh*t in the parallel world of <em>unfinished ideas</em> —
-              prototypes, half-built engines, and weekend experiments that escape
-              the lab when nobody is watching.
-            </p>
-            <p>
-              I'm a creative technologist. I build things at the intersection of
-              software, design, and play — gamified RPG dashboards, AI-driven job
-              platforms, voice-controlled tools, and the occasional retro UI.
-            </p>
-            <p>
-              When I'm not shipping, I'm thinking about how interfaces could feel
-              more like <span className="font-pixel text-sm">video&nbsp;games</span> and
-              less like spreadsheets.
-            </p>
+            {about.bio.map((para, i) => (
+              <p key={i}>{renderEmphasis(para)}</p>
+            ))}
           </div>
 
           {/* Stats card */}
           <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {[
-              { k: "STR", v: 78 },
-              { k: "AGI", v: 91 },
-              { k: "INT", v: 88 },
-              { k: "VIT", v: 73 },
-            ].map((s) => (
+            {about.stats.map((s) => (
               <div key={s.k} className="pixel-box bg-white p-4">
                 <div className="font-pixel text-[10px] uppercase text-[var(--muted-foreground)]">
                   {s.k}
@@ -71,5 +60,17 @@ export function AboutView() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Tiny markdown-ish helper: *text* → <em>
+function renderEmphasis(text: string) {
+  const parts = text.split(/(\*[^*]+\*)/g);
+  return parts.map((p, i) =>
+    p.startsWith("*") && p.endsWith("*") ? (
+      <em key={i}>{p.slice(1, -1)}</em>
+    ) : (
+      <span key={i}>{p}</span>
+    ),
   );
 }
