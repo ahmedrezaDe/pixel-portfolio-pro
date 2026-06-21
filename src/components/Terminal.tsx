@@ -1,58 +1,50 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "@/lib/game-state";
-import { skillsAscii, runProjectLog } from "@/lib/data/skills";
+import { portfolioConfig } from "@/lib/portfolioConfig";
 
 type Line = { kind: "in" | "out" | "err"; text: string };
 
-const HELP = [
-  "available commands:",
-  "  help        — list commands",
-  "  clear       — wipe history",
-  "  skills      — print ASCII skill graph",
-  "  run project — simulate a live build run",
-  "  secret      — ???",
-  "  whoami      — about Erza",
-];
+const T = portfolioConfig.terminal;
 
 export function Terminal() {
   const { addXp, sfx, muted, toggleSecretTheme, secretTheme } = useGame();
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<Line[]>([
-    { kind: "out", text: "ERZA-OS v1.0  ::  type `help` to begin" },
+    { kind: "out", text: T.boot },
   ]);
   const [input, setInput] = useState("");
   const [running, setRunning] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Auto-scroll on new output / open
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 9e9 });
-  }, [history, open]);
+    if (!open) return;
+    bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [history, open, running]);
 
-  const print = (lines: Line[]) =>
-    setHistory((h) => [...h, ...lines]);
+  const print = (lines: Line[]) => setHistory((h) => [...h, ...lines]);
 
   const exec = async (raw: string) => {
     const cmd = raw.trim().toLowerCase();
     print([{ kind: "in", text: `> ${raw}` }]);
     if (!cmd) return;
 
-    if (cmd === "help") return print(HELP.map((t) => ({ kind: "out", text: t })));
+    if (cmd === "help")
+      return print(T.help.map((t) => ({ kind: "out", text: t })));
     if (cmd === "clear") return setHistory([]);
     if (cmd === "whoami")
-      return print([
-        { kind: "out", text: "Ahmed Reza (a.k.a. Erza)" },
-        { kind: "out", text: "creative technologist · parallel realm of unfinished ideas" },
-      ]);
+      return print(T.whoami.map((t) => ({ kind: "out", text: t })));
     if (cmd === "skills") {
       return print(
-        skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })),
+        T.skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })),
       );
     }
     if (cmd === "run project" || cmd === "run") {
       setRunning(true);
-      for (const ln of runProjectLog) {
+      for (const ln of T.runProjectLog) {
         await new Promise((r) => setTimeout(r, 220));
         sfx.type(muted);
         print([{ kind: "out", text: ln }]);
@@ -68,14 +60,12 @@ export function Terminal() {
       return print([
         {
           kind: "out",
-          text: secretTheme
-            ? "secret theme: OFF · normal world restored"
-            : "▓▓ SECRET UNLOCKED ▓▓  +75 XP  ·  hidden theme engaged",
+          text: secretTheme ? T.secretOff : T.secretOn,
         },
       ]);
     }
     sfx.error(muted);
-    return print([{ kind: "err", text: `command not found: ${cmd}` }]);
+    return print([{ kind: "err", text: T.notFound(cmd) }]);
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -93,14 +83,18 @@ export function Terminal() {
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
+  const dismissKeyboard = () => {
+    inputRef.current?.blur();
+  };
+
   return (
     <>
       <button
         onClick={toggle}
-        className="fixed bottom-3 right-3 z-[57] flex items-center gap-2 rounded-sm border-2 border-[var(--ink)] bg-[var(--ink)] px-3 py-2 font-pixel text-[9px] uppercase tracking-widest text-[var(--accent-green)] shadow-[3px_3px_0_0_var(--accent-green)] hover:-translate-y-0.5 transition-transform"
+        className="fixed bottom-3 right-3 z-[57] flex items-center gap-2 rounded-sm border-2 border-[var(--ink)] bg-[var(--ink)] px-3 py-2 font-pixel text-[9px] uppercase tracking-widest text-[var(--accent-green)] shadow-[3px_3px_0_0_var(--accent-green)] transition-transform hover:-translate-y-0.5"
         aria-expanded={open}
       >
-        <span className="h-2 w-2 rounded-full bg-[var(--accent-green)] animate-pulse" />
+        <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent-green)]" />
         {open ? "Close Term" : "▶ Terminal"}
       </button>
 
@@ -113,15 +107,34 @@ export function Terminal() {
             transition={{ type: "spring", stiffness: 220, damping: 26 }}
             className="fixed inset-x-2 bottom-2 z-[56] sm:inset-x-6"
           >
-            <div className="overflow-hidden rounded-md border-2 border-[var(--ink)] bg-[#0a0e14] pixel-box-lg">
-              <div className="flex items-center justify-between border-b-2 border-[var(--ink)] bg-[#11161f] px-3 py-1.5">
-                <span className="font-pixel text-[9px] uppercase tracking-widest text-[var(--accent-green)]">
-                  erza@parallel-realm:~$
+            <div className="pixel-box-lg overflow-hidden rounded-md border-2 border-[var(--ink)] bg-[#0a0e14]">
+              <div className="flex items-center justify-between gap-2 border-b-2 border-[var(--ink)] bg-[#11161f] px-3 py-1.5">
+                <span className="truncate font-pixel text-[9px] uppercase tracking-widest text-[var(--accent-green)]">
+                  {T.prompt}
                 </span>
-                <div className="flex gap-1.5">
-                  <span className="h-3 w-3 rounded-full bg-[var(--accent-red)] border border-black" />
-                  <span className="h-3 w-3 rounded-full bg-[var(--accent-yellow)] border border-black" />
-                  <span className="h-3 w-3 rounded-full bg-[var(--accent-green)] border border-black" />
+                <div className="flex items-center gap-2">
+                  {/* Mobile-only dismiss-keyboard button */}
+                  <button
+                    onClick={dismissKeyboard}
+                    className="rounded-sm border border-[var(--accent-green)] px-2 py-0.5 font-pixel text-[8px] uppercase tracking-widest text-[var(--accent-green)] sm:hidden"
+                    aria-label="Dismiss keyboard"
+                    type="button"
+                  >
+                    ⌄ kbd
+                  </button>
+                  <button
+                    onClick={toggle}
+                    className="rounded-sm border border-[var(--accent-red)] px-2 py-0.5 font-pixel text-[8px] uppercase tracking-widest text-[var(--accent-red)]"
+                    aria-label="Close terminal"
+                    type="button"
+                  >
+                    ✕ close
+                  </button>
+                  <div className="hidden gap-1.5 sm:flex">
+                    <span className="h-3 w-3 rounded-full border border-black bg-[var(--accent-red)]" />
+                    <span className="h-3 w-3 rounded-full border border-black bg-[var(--accent-yellow)]" />
+                    <span className="h-3 w-3 rounded-full border border-black bg-[var(--accent-green)]" />
+                  </div>
                 </div>
               </div>
 
@@ -129,6 +142,7 @@ export function Terminal() {
                 ref={scrollRef}
                 className="h-56 overflow-y-auto px-3 py-2 font-pixel text-[10px] leading-relaxed text-[var(--accent-green)] sm:h-64"
                 onClick={() => inputRef.current?.focus()}
+                style={{ overscrollBehavior: "contain" }}
               >
                 {history.map((l, i) => (
                   <pre
@@ -158,8 +172,10 @@ export function Terminal() {
                     placeholder={running ? "running…" : "type a command"}
                     autoComplete="off"
                     spellCheck={false}
+                    enterKeyHint="send"
                   />
                 </form>
+                <div ref={bottomRef} />
               </div>
             </div>
           </motion.div>
