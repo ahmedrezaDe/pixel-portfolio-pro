@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { projects, type Project } from "@/lib/data/projects";
 import { ArcadeCabinet } from "./ArcadeCabinet";
 import { Blueprint } from "./Blueprint";
 import { useGame } from "@/lib/game-state";
+import { portfolioConfig, type Project } from "@/lib/portfolioConfig";
 
 export function PortfolioView() {
   const [open, setOpen] = useState<Project | null>(null);
   const { addXp, sfx, muted } = useGame();
+  const { arcade, projects } = portfolioConfig;
 
   return (
     <div className="min-h-screen bg-white pt-24">
-      <div className="mx-auto max-w-6xl px-6 pb-24">
+      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
         <div className="mb-8 text-center">
           <div className="font-pixel text-[10px] uppercase tracking-widest text-[var(--accent-purple)]">
-            ◤ Live Arcade Row ◢
+            {arcade.eyebrow}
           </div>
           <h1
             className="mt-3 font-display tracking-tight"
@@ -25,21 +26,30 @@ export function PortfolioView() {
               lineHeight: 0.9,
             }}
           >
-            ERZA · ARCADE
+            {arcade.title}
           </h1>
           <p className="mt-3 font-pixel text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
-            Walk up. Drop coin. Read the blueprint.
+            {arcade.subtitle}
           </p>
         </div>
 
-        {/* Cabinet row — horizontal scroll snap */}
+        {/* Cabinet row — horizontal scroll snap (mobile-first) */}
         <div className="relative">
           <div
-            className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-2 pb-6"
-            style={{ scrollPaddingLeft: "1rem" }}
+            className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-6 sm:mx-0 sm:gap-6 sm:px-2"
+            style={{
+              scrollPaddingLeft: "1rem",
+              scrollPaddingRight: "1rem",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehaviorX: "contain",
+            }}
           >
             {projects.map((p) => (
-              <div key={p.id} className="snap-center">
+              <div
+                key={p.id}
+                className="shrink-0 snap-center"
+                style={{ scrollSnapStop: "always" }}
+              >
                 <ArcadeCabinet
                   project={p}
                   muted={muted}
@@ -54,7 +64,7 @@ export function PortfolioView() {
             ))}
           </div>
           <div className="mt-2 text-center font-pixel text-[8px] uppercase tracking-widest text-[var(--muted-foreground)]">
-            ◀ scroll · drag · pick a cabinet ▶
+            {arcade.scrollHint}
           </div>
         </div>
       </div>
