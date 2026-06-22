@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [view, setView] = useState<View>("loading");
-  const { markVisited, sfx, muted } = useGame();
+  const { markVisited, sfx, muted, secretTheme, toggleSecretTheme } = useGame();
 
   useEffect(() => {
     if (view !== "loading") markVisited(view);
