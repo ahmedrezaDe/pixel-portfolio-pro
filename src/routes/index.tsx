@@ -11,6 +11,7 @@ import { CRTOverlay } from "@/components/CRTOverlay";
 import { XPBar } from "@/components/XPBar";
 import { SettingsToggles } from "@/components/SettingsToggles";
 import { Terminal } from "@/components/Terminal";
+import TheVoidBattle from "@/components/TheVoidBattle";
 import { GameProvider, useGame } from "@/lib/game-state";
 import type { View } from "@/lib/views";
 
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [view, setView] = useState<View>("loading");
-  const { markVisited, sfx, muted } = useGame();
+  const { markVisited, sfx, muted, secretTheme, toggleSecretTheme } = useGame();
 
   useEffect(() => {
     if (view !== "loading") markVisited(view);
@@ -67,6 +68,8 @@ function Index() {
       </AnimatePresence>
 
       {view !== "loading" && <Terminal />}
+
+      <TheVoidBattle open={secretTheme} onClose={toggleSecretTheme} />
     </div>
   );
 }
