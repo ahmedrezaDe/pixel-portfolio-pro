@@ -118,9 +118,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GameProvider>
+        <RootInner />
+      </GameProvider>
+    </QueryClientProvider>
+  );
+}
+
+function RootInner() {
   const { secretTheme, toggleSecretTheme, addXp, sfx, muted } = useGame();
 
-  // Battle Logic Callbacks
   const handleDebug = () => {
     sfx.click(muted);
     addXp(10, "combat-debug");
@@ -137,28 +146,24 @@ function RootComponent() {
   };
 
   const handleForcePush = () => {
-    sfx.error(muted); // Massive damage sound
+    sfx.error(muted);
     addXp(250, "boss-defeated");
-    
-    // Give it a 2-second dramatic pause before rebooting the OS
     setTimeout(() => {
-      toggleSecretTheme(); // Closes the void and returns to normal OS
+      toggleSecretTheme();
     }, 2000);
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Outlet />
-      
-      {/* The Glitch Overlay mounted globally */}
-      <TheVoidBattle 
-        open={secretTheme} 
+      <TheVoidBattle
+        open={secretTheme}
         onClose={toggleSecretTheme}
         onDebug={handleDebug}
         onRefactor={handleRefactor}
         onCaffeine={handleCaffeine}
         onGitPush={handleForcePush}
       />
-    </QueryClientProvider>
+    </>
   );
 }
