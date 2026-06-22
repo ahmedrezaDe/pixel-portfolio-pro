@@ -6,8 +6,26 @@
 export type BlueprintNode = { id: string; label: string; x: number; y: number };
 export type BlueprintEdge = { from: string; to: string };
 
+export type ArtifactMass = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type HexColor = `#${string}`;
+
+export type ProjectArtifact = {
+  mass: ArtifactMass;
+  glowColor: HexColor;
+  orbitRadius: number;
+};
+
+// ADDED: Sector type
+export type Sector = {
+  id: string;
+  title: string;
+  year: string;
+  color: string;
+};
+
 export type Project = {
   id: string;
+  sectorId: string; // ADDED THIS
   title: string;
   tag: string;
   blurb: string;
@@ -15,6 +33,7 @@ export type Project = {
   bg: string;
   monitor: string;
   blueprint: { nodes: BlueprintNode[]; edges: BlueprintEdge[] };
+  artifact: ProjectArtifact;
 };
 
 export type StatLine = { k: string; v: number };
@@ -55,8 +74,10 @@ export type PortfolioConfig = {
     eyebrow: string;
     title: string;
     subtitle: string;
-    scrollHint: string;
   };
+
+  sectors: Sector[]; // FIXED THIS TO BE AN ARRAY
+
   projects: Project[];
   terminal: {
     boot: string;
@@ -90,10 +111,10 @@ export const portfolioConfig: PortfolioConfig = {
       "When I'm not shipping, I'm thinking about how interfaces could feel more like video games and less like spreadsheets.",
     ],
     stats: [
-      { k: "STR", v: 78 },
+      { k: "STR", v: 83 },
       { k: "AGI", v: 91 },
-      { k: "INT", v: 88 },
-      { k: "VIT", v: 73 },
+      { k: "INT", v: 87 },
+      { k: "VIT", v: 79 },
     ],
   },
 
@@ -144,15 +165,21 @@ export const portfolioConfig: PortfolioConfig = {
   },
 
   arcade: {
-    eyebrow: "◤ Live Arcade Row ◢",
-    title: "ERZA · ARCADE",
-    subtitle: "Walk up. Drop coin. Read the blueprint.",
-    scrollHint: "◀ scroll · drag · pick a cabinet ▶",
+    eyebrow: "THE GENESIS NEBULA + EPOCH 2026",
+    title: "PARALLEL REALM",
+    subtitle: "DRIFT THROUGH THE GALAXY. INITIATE A RIFT TO EXPLORE.",
   },
+
+  sectors: [
+    { id: "genesis", title: "Genesis", year: "2026", color: "#4a9eff" },
+    { id: "elysium", title: "Elysium", year: "2027", color: "#a855f7" },
+    { id: "tartarus", title: "Tartarus", year: "2028", color: "#ef4444" },
+  ],
 
   projects: [
     {
       id: "tower-hunter",
+      sectorId: "genesis", 
       title: "TOWER HUNTER",
       tag: "RPG · DESKTOP",
       blurb:
@@ -182,9 +209,15 @@ export const portfolioConfig: PortfolioConfig = {
           { from: "quest", to: "hud" },
         ],
       },
+      artifact: {
+        mass: 8,
+        glowColor: "#4a9eff",
+        orbitRadius: 120,
+      },
     },
     {
       id: "odyssey",
+      sectorId: "genesis", // FIXED: Added comma
       title: "ODYSSEY ORCHESTRATOR",
       tag: "AI · AUTOMATION",
       blurb: "Autonomous job-hunting and content pipeline orchestrated via webhooks. Agents crawl, parse, and execute headless browsers in real-time.",
@@ -211,9 +244,15 @@ export const portfolioConfig: PortfolioConfig = {
           { from: "play", to: "out" },
         ],
       },
+      artifact: {
+        mass: 6,
+        glowColor: "#c44569",
+        orbitRadius: 100,
+      },
     },
     {
       id: "orbit-commerce",
+      sectorId: "genesis", // FIXED: Added comma
       title: "ORBIT COMMERCE",
       tag: "BACKEND · HEADLESS",
       blurb: "Enterprise-grade headless commerce and data synchronization engine. Designed for high availability, fault tolerance, and massive data pools.",
@@ -239,9 +278,15 @@ export const portfolioConfig: PortfolioConfig = {
           { from: "cache", to: "db" },
         ],
       },
+      artifact: {
+        mass: 9,
+        glowColor: "#73ffb8",
+        orbitRadius: 140,
+      },
     },
     {
       id: "unfinished",
+      sectorId: "genesis", // FIXED: Added comma
       title: "UNFINISHED.EXE",
       tag: "COLLECTION",
       blurb:
@@ -267,22 +312,28 @@ export const portfolioConfig: PortfolioConfig = {
           { from: "p1", to: "ship" },
         ],
       },
+      artifact: {
+        mass: 4,
+        glowColor: "#818cf8",
+        orbitRadius: 80,
+      },
     },
   ],
 
   terminal: {
-    boot: "ERZA-OS v1.0  ::  type `help` to begin",
+    boot: "Paralell-OS v1.0 — type `help` to begin",
     prompt: "erza@parallel-realm:~$",
     help: [
       "available commands:",
-      "  help        — list commands",
-      "  clear       — wipe history",
-      "  skills      — print ASCII skill graph",
-      "  run project — simulate a live build run",
-      "  run-scraper — execute playwright DOM crawler",
-      "  system-check— ping headless commerce backend",
-      "  secret      — ???",
-      "  whoami      — about Erza",
+      "  help           — list commands",
+      "  clear          — wipe history",
+      "  skills         — print ASCII skill graph",
+      "  run project    — simulate a live build run",
+      "  run-scraper    — execute playwright DOM crawler",
+      "  system-check   — ping headless commerce backend",
+      "  secret         — ???",
+      "  whoami         — about Erza",
+      "  reset          — hard factory reset",
     ],
     whoami: [
       "Ahmed Reza (a.k.a. Erza)",

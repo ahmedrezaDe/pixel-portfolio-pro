@@ -36,7 +36,7 @@ const initial: Persisted = {
 function loadPersisted(): Persisted {
   if (typeof window === "undefined") return initial;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return initial;
     return { ...initial, ...JSON.parse(raw) };
   } catch {
@@ -62,7 +62,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {}
   }, [state, hydrated]);
 

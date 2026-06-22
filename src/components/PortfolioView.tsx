@@ -1,165 +1,140 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { ArcadeCabinet } from "./ArcadeCabinet";
-import { Blueprint } from "./Blueprint";
+import { useCallback, useState, useMemo } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { Constellation } from "./Constellation";
+import { ProjectBloom } from "./ProjectBloom";
+import { UniverseEngine } from "./UniverseEngine";
 import { useGame } from "@/lib/game-state";
-import { portfolioConfig, type Project } from "@/lib/portfolioConfig";
+import { portfolioConfig, type Project, type Sector } from "@/lib/portfolioConfig";
+
+const VIEW_ENTRY = { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const };
 
 export function PortfolioView() {
-  const [open, setOpen] = useState<Project | null>(null);
-  const { addXp, sfx, muted } = useGame();
-  const { arcade, projects } = portfolioConfig;
+  const { sfx, muted } = useGame();
+  const { arcade, projects, sectors } = portfolioConfig;
+
+  // State Machine
+  const [viewMode, setViewMode] = useState<'galaxy' | 'multiverse'>('galaxy');
+  const [activeSectorId, setActiveSectorId] = useState<string>("genesis");
+  const [warpState, setWarpState] = useState<'none' | 'in' | 'out'>('none');
+  
+  const [selection, setSelection] = useState<{ project: Project; origin: { x: number; y: number } } | null>(null);
+  const [burstEvent, setBurstEvent] = useState<any>(null);
+
+  // Filter projects by current active sector
+  const activeProjects = useMemo(() => projects.filter(p => p.sectorId === activeSectorId), [activeSectorId, projects]);
+  const activeSector = sectors.find(s => s.id === activeSectorId) || sectors[0];
+
+  // --- TRANSITIONS ---
+  const ascendToMultiverse = () => {
+    sfx.open(muted);
+    setWarpState('out'); // Trigger pull-back stars
+    setTimeout(() => {
+      setViewMode('multiverse');
+      setTimeout(() => setWarpState('none'), 400); // Settle stars
+    }, 600);
+  };
+
+  const diveIntoSector = (sectorId: string) => {
+    sfx.levelUp(muted);
+    setWarpState('in'); // Trigger forward warp
+    setActiveSectorId(sectorId);
+    setTimeout(() => {
+      setViewMode('galaxy');
+      setTimeout(() => setWarpState('none'), 400); // Settle stars
+    }, 600);
+  };
+
+  // --- PROJECT SELECTION ---
+  const handleSelect = useCallback((project: Project, e?: React.MouseEvent | React.KeyboardEvent) => {
+      let origin = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; 
+      if (e && 'clientX' in e) origin = { x: (e as React.MouseEvent).clientX, y: (e as React.MouseEvent).clientY };
+      
+      setBurstEvent({ x: origin.x, y: origin.y, color: project.artifact.glowColor, mass: project.artifact.mass, timestamp: Date.now() });
+      sfx.open(muted);
+      setSelection({ project, origin });
+    }, [muted, sfx]
+  );
 
   return (
-    <div className="min-h-screen bg-white pt-24">
-      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <div className="mb-8 text-center">
-          <div className="font-pixel text-[10px] uppercase tracking-widest text-[var(--accent-purple)]">
-            {arcade.eyebrow}
-          </div>
-          <h1
-            className="mt-3 font-display tracking-tight"
-            style={{
-              fontSize: "clamp(3rem,9vw,7rem)",
-              color: "var(--accent-blue)",
-              textShadow: "5px 5px 0 var(--ink)",
-              lineHeight: 0.9,
-            }}
-          >
-            {arcade.title}
-          </h1>
-          <p className="mt-3 font-pixel text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
-            {arcade.subtitle}
-          </p>
-        </div>
-
-        {/* Cabinet row — horizontal scroll snap (mobile-first) */}
-        <div className="relative">
-          <div
-            className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-6 sm:mx-0 sm:gap-6 sm:px-2"
-            style={{
-              scrollPaddingLeft: "1rem",
-              scrollPaddingRight: "1rem",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehaviorX: "contain",
-            }}
-          >
-            {projects.map((p) => (
-              <div
-                key={p.id}
-                className="shrink-0 snap-center"
-                style={{ scrollSnapStop: "always" }}
-              >
-                <ArcadeCabinet
-                  project={p}
-                  muted={muted}
-                  onHover={() => sfx.hover(muted)}
-                  onOpen={() => {
-                    sfx.open(muted);
-                    addXp(20, "open-project");
-                    setOpen(p);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="mt-2 text-center font-pixel text-[8px] uppercase tracking-widest text-[var(--muted-foreground)]">
-            {arcade.scrollHint}
-          </div>
-        </div>
+    <LayoutGroup>
+      {/* Background Engine controlled by warp state */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <UniverseEngine burst={burstEvent} warpDirection={warpState} />
       </div>
 
-      <AnimatePresence>
-        {open && <ProjectOverlay project={open} onClose={() => setOpen(null)} />}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function ProjectOverlay({
-  project,
-  onClose,
-}: {
-  project: Project;
-  onClose: () => void;
-}) {
-  return (
-    <motion.div
-      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto p-4 backdrop-blur-md"
-      style={{ background: "rgba(0,0,0,0.55)" }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
       <motion.div
-        initial={{ scale: 0.85, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        onClick={(e) => e.stopPropagation()}
-        className="pixel-box-lg my-8 w-full max-w-4xl overflow-hidden rounded-md border-2 border-[var(--ink)] bg-white"
-        style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+        className="relative min-h-screen overflow-hidden z-10"
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={VIEW_ENTRY}
       >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between border-b-2 border-[var(--ink)] px-4 py-3"
-          style={{ background: project.bg }}
-        >
-          <div className="font-pixel text-[10px] uppercase tracking-widest text-white">
-            ▶ POWER UP — {project.title}
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-sm border-2 border-[var(--ink)] bg-white px-3 py-1 font-pixel text-[9px] uppercase tracking-wider"
-          >
-            ✕ Close
-          </button>
+        {/* Dynamic Titles */}
+        <div className="pointer-events-none absolute inset-x-0 top-24 z-20 px-4 text-center">
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: selection ? 0 : 1, y: selection ? -8 : 0 }} transition={VIEW_ENTRY}>
+            <div className="font-pixel text-[10px] uppercase tracking-widest text-[var(--accent-purple)]">
+              {/* REMOVED the // slashes */}
+              {viewMode === 'galaxy' ? `SECTOR: ${activeSector.title} ✦ EPOCH ${activeSector.year}` : "MULTIVERSE MAP ✦ THE MACROCOSM"}
+            </div>
+            <h1 className="mt-3 font-display tracking-tight text-white" style={{ fontSize: "clamp(2rem,7vw,5rem)", textShadow: "4px 4px 0 rgba(0,0,0,0.85)", lineHeight: 0.9 }}>
+               {viewMode === 'galaxy' ? arcade.title : "THE ARCHIVE"}
+            </h1>
+            <p className="mt-3 font-pixel text-[9px] uppercase tracking-widest text-white/45">
+              {viewMode === 'galaxy' ? arcade.subtitle : "SELECT A GALAXY NODE TO COMMENCE WARP"}
+            </p>
+          </motion.div>
         </div>
 
-        <div className="grid gap-6 p-6 lg:grid-cols-2">
-          <div>
-            <div className="font-pixel text-[9px] uppercase tracking-widest text-[var(--accent-purple)]">
-              {project.tag}
-            </div>
-            <h2 className="mt-2 font-display text-4xl leading-none">
-              {project.title}
-            </h2>
-            <p className="mt-4 text-[var(--ink)]">{project.blurb}</p>
-
-            {/* Tech matrix */}
-            <div className="mt-6">
-              <div className="font-pixel text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
-                ◤ Tech Matrix
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {project.stack.map((t) => (
-                  <div
-                    key={t.name}
-                    className="flex items-center justify-between border-2 border-[var(--ink)] bg-[var(--muted)] px-3 py-2"
+        {/* View Router */}
+        <AnimatePresence mode="wait">
+          {viewMode === 'galaxy' ? (
+            <motion.div key="galaxy" className="absolute inset-0" initial={{ scale: 2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={VIEW_ENTRY}>
+              <Constellation projects={activeProjects} selectedProject={selection?.project || null} onSelect={handleSelect} />
+              
+              {/* Ascend Trigger - Moved up to bottom-10 to prevent overlapping */}
+              {!selection && (
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-6">
+                  <p className="pointer-events-none font-pixel text-[8px] uppercase tracking-[0.35em] text-white/35">
+                    move cursor · click an artifact to initiate rift
+                  </p>
+                  <button 
+                    onClick={ascendToMultiverse}
+                    className="px-4 py-2 font-pixel text-[8px] uppercase tracking-widest text-[var(--accent-yellow)] border border-[var(--accent-yellow)]/30 bg-black/40 hover:bg-[var(--accent-yellow)]/10 transition-colors"
                   >
-                    <span className="font-pixel text-[10px] uppercase">
-                      {t.name}
-                    </span>
-                    <span className="font-pixel text-[8px] uppercase tracking-wider text-[var(--muted-foreground)]">
-                      {t.role}
-                    </span>
+                    ▼ Ascend to Multiverse
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div key="multiverse" className="absolute inset-0 flex items-center justify-center gap-12" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 2, opacity: 0 }} transition={VIEW_ENTRY}>
+              {sectors.map((sector) => (
+                <motion.button
+                  key={sector.id}
+                  onClick={() => diveIntoSector(sector.id)}
+                  whileHover={{ scale: 1.1 }}
+                  className="group relative flex flex-col items-center gap-4"
+                >
+                  {/* Macro Sector Orb */}
+                  <div className="w-24 h-24 rounded-full border border-white/20 transition-all group-hover:border-white/60"
+                       style={{ background: `radial-gradient(circle at 35% 30%, ${sector.color}, ${sector.color}44 55%, #050510 100%)`, boxShadow: `0 0 30px ${sector.color}55, 0 0 80px ${sector.color}22` }} 
+                  />
+                  <div className="text-center">
+                    <p className="font-pixel text-[10px] uppercase tracking-widest text-white">{sector.title}</p>
+                    <p className="mt-1 font-pixel text-[8px] uppercase tracking-wider text-[var(--accent-purple)]">EPOCH {sector.year}</p>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="font-pixel text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
-              ◤ Architecture Blueprint
-            </div>
-            <div className="mt-3">
-              <Blueprint project={project} />
-            </div>
-          </div>
-        </div>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
-    </motion.div>
+
+      {/* Rifts */}
+      <AnimatePresence>
+        {selection && (
+          <ProjectBloom key={selection.project.id} project={selection.project} origin={selection.origin} onClose={() => setSelection(null)} />
+        )}
+      </AnimatePresence>
+    </LayoutGroup>
   );
 }

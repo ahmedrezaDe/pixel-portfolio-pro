@@ -9,10 +9,12 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { GameProvider, useGame } from "@/lib/game-state";
 import TheVoidBattle from "@/components/TheVoidBattle";
+import { AudioPlayer } from '@/components/AudioPlayer'
 
 function NotFoundComponent() {
   return (
@@ -155,6 +157,7 @@ function RootInner() {
 
   return (
     <>
+      <AudioPlayer />
       <Outlet />
       <TheVoidBattle
         open={secretTheme}

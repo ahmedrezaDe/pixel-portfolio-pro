@@ -48,14 +48,47 @@ export function Terminal() {
     if (cmd === "skills") {
       return print(T.skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })));
     }
-    
+
     if (cmd === "run project" || cmd === "run") return simulateLog(T.runProjectLog);
     if (cmd === "run-scraper") return simulateLog(T.runScraperLog);
     if (cmd === "system-check") return simulateLog(T.systemCheckLog);
 
+    if (cmd === "reset") {
+      setRunning(true);
+      sfx.error(muted);
+      print([{ kind: "err", text: "> WIPE REQUEST RECEIVED..." }]);
+
+      // ASCII Art Wipe
+      const wipeArt = `
+  ◢◤◢◤  SYSTEM PURGE  ◢◤◢◤
+  ░░░░  ERASING DATA  ░░░░
+  ◢◤◢◤  FACTORY RESET ◢◤◢◤
+      `;
+
+      setTimeout(() => {
+        print([{ kind: "err", text: wipeArt }]);
+        sfx.type(muted);
+      }, 800);
+
+      setTimeout(() => {
+        print([{ kind: "err", text: "> CLEARING ALL STORAGE NODES..." }]);
+        window.localStorage.removeItem("erza.gamestate.v1");
+        window.sessionStorage.removeItem("erza.gamestate.v1");
+        sfx.error(muted);
+      }, 2000);
+
+      setTimeout(() => {
+        print([{ kind: "out", text: "> RESET COMPLETE. REBOOTING..." }]);
+        sfx.levelUp(muted);
+        window.location.reload();
+      }, 3500);
+
+      return;
+    }
+
     if (cmd === "secret") {
       setRunning(true);
-      sfx.error(muted); 
+      sfx.error(muted);
       print([{ kind: "err", text: "> WARNING: LOCATING UNFINISHED_IDEA..." }]);
 
       setTimeout(() => {
@@ -69,7 +102,7 @@ export function Terminal() {
       }, 2200);
 
       setTimeout(() => {
-        toggleSecretTheme(); 
+        toggleSecretTheme();
         addXp(500, "void-breach");
         sfx.levelUp(muted);
         setRunning(false);
