@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useGame } from "@/lib/game-state";
-import { TheVoidBattle } from "@/components/TheVoidBattle";
+import TheVoidBattle  from "@/components/TheVoidBattle";
 
 function NotFoundComponent() {
   return (
