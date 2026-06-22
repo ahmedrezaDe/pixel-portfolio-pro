@@ -8,7 +8,7 @@ type Line = { kind: "in" | "out" | "err"; text: string };
 const T = portfolioConfig.terminal;
 
 export function Terminal() {
-  const { addXp, sfx, muted, toggleSecretTheme} = useGame();
+  const { addXp, sfx, muted, toggleSecretTheme } = useGame();
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<Line[]>([
     { kind: "out", text: T.boot },
@@ -19,7 +19,6 @@ export function Terminal() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll on new output / open
   useEffect(() => {
     if (!open) return;
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
@@ -27,7 +26,6 @@ export function Terminal() {
 
   const print = (lines: Line[]) => setHistory((h) => [...h, ...lines]);
 
-  // Reusable helper to simulate typing out a log array line-by-line
   const simulateLog = async (logArray: string[]) => {
     setRunning(true);
     for (const ln of logArray) {
@@ -44,31 +42,20 @@ export function Terminal() {
     print([{ kind: "in", text: `> ${raw}` }]);
     if (!cmd) return;
 
-    if (cmd === "help")
-      return print(T.help.map((t) => ({ kind: "out", text: t })));
+    if (cmd === "help") return print(T.help.map((t) => ({ kind: "out", text: t })));
     if (cmd === "clear") return setHistory([]);
-    if (cmd === "whoami")
-      return print(T.whoami.map((t) => ({ kind: "out", text: t })));
+    if (cmd === "whoami") return print(T.whoami.map((t) => ({ kind: "out", text: t })));
     if (cmd === "skills") {
-      return print(
-        T.skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })),
-      );
+      return print(T.skillsAscii.split("\n").map((t) => ({ kind: "out", text: t })));
     }
     
-    // Automation Script Execution Commands
-    if (cmd === "run project" || cmd === "run") {
-      return simulateLog(T.runProjectLog);
-    }
-    if (cmd === "run-scraper") {
-      return simulateLog(T.runScraperLog);
-    }
-    if (cmd === "system-check") {
-      return simulateLog(T.systemCheckLog);
-    }
+    if (cmd === "run project" || cmd === "run") return simulateLog(T.runProjectLog);
+    if (cmd === "run-scraper") return simulateLog(T.runScraperLog);
+    if (cmd === "system-check") return simulateLog(T.systemCheckLog);
 
     if (cmd === "secret") {
       setRunning(true);
-      sfx.error(muted); // Initial glitch warning
+      sfx.error(muted); 
       print([{ kind: "err", text: "> WARNING: LOCATING UNFINISHED_IDEA..." }]);
 
       setTimeout(() => {
@@ -82,19 +69,17 @@ export function Terminal() {
       }, 2200);
 
       setTimeout(() => {
-        toggleSecretTheme(); // This triggers the Void overlay
+        toggleSecretTheme(); 
         addXp(500, "void-breach");
         sfx.levelUp(muted);
         setRunning(false);
       }, 3500);
-      
       return;
     }
 
-    // Default error for unknown commands (This was missing!)
     sfx.error(muted);
     return print([{ kind: "err", text: T.notFound(cmd) }]);
-  }; // This closing bracket was missing!
+  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +126,6 @@ export function Terminal() {
                   {T.prompt}
                 </span>
                 <div className="flex items-center gap-2">
-                  {/* Mobile-only dismiss-keyboard button */}
                   <button
                     onClick={dismissKeyboard}
                     className="rounded-sm border border-[var(--accent-green)] px-2 py-0.5 font-pixel text-[8px] uppercase tracking-widest text-[var(--accent-green)] sm:hidden"
