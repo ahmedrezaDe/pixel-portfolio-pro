@@ -11,6 +11,7 @@ import { CRTOverlay } from "@/components/CRTOverlay";
 import { XPBar } from "@/components/XPBar";
 import { SettingsToggles } from "@/components/SettingsToggles";
 import { Terminal } from "@/components/Terminal";
+import TheVoidBattle from "@/components/TheVoidBattle";
 import { GameProvider, useGame } from "@/lib/game-state";
 import type { View } from "@/lib/views";
 
