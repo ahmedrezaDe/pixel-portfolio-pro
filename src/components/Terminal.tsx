@@ -8,7 +8,7 @@ type Line = { kind: "in" | "out" | "err"; text: string };
 const T = portfolioConfig.terminal;
 
 export function Terminal() {
-  const { addXp, sfx, muted, toggleSecretTheme, secretTheme } = useGame();
+  const { addXp, sfx, muted, toggleSecretTheme} = useGame();
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<Line[]>([
     { kind: "out", text: T.boot },
@@ -82,7 +82,7 @@ export function Terminal() {
       }, 2200);
 
       setTimeout(() => {
-        toggleSecretTheme(); // This will soon trigger the Void overlay instead of the light mode
+        toggleSecretTheme(); // This triggers the Void overlay
         addXp(500, "void-breach");
         sfx.levelUp(muted);
         setRunning(false);
@@ -90,6 +90,11 @@ export function Terminal() {
       
       return;
     }
+
+    // Default error for unknown commands (This was missing!)
+    sfx.error(muted);
+    return print([{ kind: "err", text: T.notFound(cmd) }]);
+  }; // This closing bracket was missing!
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
