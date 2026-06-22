@@ -11,8 +11,7 @@ import { CRTOverlay } from "@/components/CRTOverlay";
 import { XPBar } from "@/components/XPBar";
 import { SettingsToggles } from "@/components/SettingsToggles";
 import { Terminal } from "@/components/Terminal";
-import TheVoidBattle from "@/components/TheVoidBattle";
-import { GameProvider, useGame } from "@/lib/game-state";
+import { useGame } from "@/lib/game-state";
 import type { View } from "@/lib/views";
 
 export const Route = createFileRoute("/")({
@@ -24,11 +23,7 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Ahmed Reza (Erza) — gamified 8-bit portfolio." },
     ],
   }),
-  component: () => (
-    <GameProvider>
-      <Index />
-    </GameProvider>
-  ),
+  component: Index,
 });
 
 function Index() {
