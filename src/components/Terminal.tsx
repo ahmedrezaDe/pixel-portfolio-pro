@@ -67,19 +67,29 @@ export function Terminal() {
     }
 
     if (cmd === "secret") {
-      toggleSecretTheme();
-      addXp(75, "secret");
-      sfx.levelUp(muted);
-      return print([
-        {
-          kind: "out",
-          text: secretTheme ? T.secretOff : T.secretOn,
-        },
-      ]);
+      setRunning(true);
+      sfx.error(muted); // Initial glitch warning
+      print([{ kind: "err", text: "> WARNING: LOCATING UNFINISHED_IDEA..." }]);
+
+      setTimeout(() => {
+        print([{ kind: "err", text: "> TRACE FOUND AT ROOT/THE_VOID." }]);
+        sfx.type(muted);
+      }, 1000);
+
+      setTimeout(() => {
+        print([{ kind: "err", text: "> INITIALIZING CONTAINMENT... [CRITICAL ERROR]" }]);
+        sfx.error(muted);
+      }, 2200);
+
+      setTimeout(() => {
+        toggleSecretTheme(); // This will soon trigger the Void overlay instead of the light mode
+        addXp(500, "void-breach");
+        sfx.levelUp(muted);
+        setRunning(false);
+      }, 3500);
+      
+      return;
     }
-    sfx.error(muted);
-    return print([{ kind: "err", text: T.notFound(cmd) }]);
-  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();

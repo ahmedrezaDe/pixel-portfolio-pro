@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useGame } from "@/lib/game-state";
+import { TheVoidBattle } from "@/components/TheVoidBattle";
 
 function NotFoundComponent() {
   return (
@@ -116,11 +118,47 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { secretTheme, toggleSecretTheme, addXp, sfx, muted } = useGame();
+
+  // Battle Logic Callbacks
+  const handleDebug = () => {
+    sfx.click(muted);
+    addXp(10, "combat-debug");
+  };
+
+  const handleRefactor = () => {
+    sfx.levelUp(muted);
+    addXp(15, "combat-heal");
+  };
+
+  const handleCaffeine = () => {
+    sfx.click(muted);
+    addXp(20, "combat-buff");
+  };
+
+  const handleForcePush = () => {
+    sfx.error(muted); // Massive damage sound
+    addXp(250, "boss-defeated");
+    
+    // Give it a 2-second dramatic pause before rebooting the OS
+    setTimeout(() => {
+      toggleSecretTheme(); // Closes the void and returns to normal OS
+    }, 2000);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      
+      {/* The Glitch Overlay mounted globally */}
+      <TheVoidBattle 
+        open={secretTheme} 
+        onClose={toggleSecretTheme}
+        onDebug={handleDebug}
+        onRefactor={handleRefactor}
+        onCaffeine={handleCaffeine}
+        onGitPush={handleForcePush}
+      />
     </QueryClientProvider>
   );
 }
