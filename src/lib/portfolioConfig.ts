@@ -67,8 +67,6 @@ export type PortfolioConfig = {
     runProjectLog: string[];
     runScraperLog: string[];   
     systemCheckLog: string[];
-    secretOn: string;
-    secretOff: string;
     notFound: (cmd: string) => string;
   };
 };
@@ -341,8 +339,6 @@ export const portfolioConfig: PortfolioConfig = {
       "[db]      postgres connection pool ..... 14/20 active",
       "[sys]     all enterprise services operational.",
     ],
-    secretOn: "▓▓ SECRET UNLOCKED ▓▓  +75 XP  ·  hidden theme engaged",
-    secretOff: "secret theme: OFF · normal world restored",
     notFound: (cmd: string) => `command not found: ${cmd}`,
   },
 };
