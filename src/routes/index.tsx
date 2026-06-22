@@ -63,8 +63,6 @@ function Index() {
       </AnimatePresence>
 
       {view !== "loading" && <Terminal />}
-
-      <TheVoidBattle open={secretTheme} onClose={toggleSecretTheme} />
     </div>
   );
 }
