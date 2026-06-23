@@ -3,8 +3,15 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { Constellation } from "./Constellation";
 import { ProjectBloom } from "./ProjectBloom";
 import { UniverseEngine } from "./UniverseEngine";
+import { GalaxyOrb, type GalaxyKind } from "./GalaxyOrb";
 import { useGame } from "@/lib/game-state";
-import { portfolioConfig, type Project, type Sector } from "@/lib/portfolioConfig";
+import { portfolioConfig, type Project } from "@/lib/portfolioConfig";
+
+const SECTOR_KIND: Record<string, GalaxyKind> = {
+  genesis: "spiral",
+  elysium: "nebula",
+  tartarus: "cluster",
+};
 
 const VIEW_ENTRY = { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const };
 
@@ -108,21 +115,14 @@ export function PortfolioView() {
           ) : (
             <motion.div key="multiverse" className="absolute inset-0 flex items-center justify-center gap-12" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 2, opacity: 0 }} transition={VIEW_ENTRY}>
               {sectors.map((sector) => (
-                <motion.button
+                <SectorOrb
                   key={sector.id}
-                  onClick={() => diveIntoSector(sector.id)}
-                  whileHover={{ scale: 1.1 }}
-                  className="group relative flex flex-col items-center gap-4"
-                >
-                  {/* Macro Sector Orb */}
-                  <div className="w-24 h-24 rounded-full border border-white/20 transition-all group-hover:border-white/60"
-                       style={{ background: `radial-gradient(circle at 35% 30%, ${sector.color}, ${sector.color}44 55%, #050510 100%)`, boxShadow: `0 0 30px ${sector.color}55, 0 0 80px ${sector.color}22` }} 
-                  />
-                  <div className="text-center">
-                    <p className="font-pixel text-[10px] uppercase tracking-widest text-white">{sector.title}</p>
-                    <p className="mt-1 font-pixel text-[8px] uppercase tracking-wider text-[var(--accent-purple)]">EPOCH {sector.year}</p>
-                  </div>
-                </motion.button>
+                  id={sector.id}
+                  color={sector.color}
+                  title={sector.title}
+                  year={sector.year}
+                  onSelect={() => diveIntoSector(sector.id)}
+                />
               ))}
             </motion.div>
           )}
@@ -136,5 +136,41 @@ export function PortfolioView() {
         )}
       </AnimatePresence>
     </LayoutGroup>
+  );
+}
+
+function SectorOrb({
+  id,
+  color,
+  title,
+  year,
+  onSelect,
+}: {
+  id: string;
+  color: string;
+  title: string;
+  year: string | number;
+  onSelect: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const kind = SECTOR_KIND[id] ?? "spiral";
+  return (
+    <motion.button
+      onClick={onSelect}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={{ scale: 1.1 }}
+      className="group relative flex flex-col items-center gap-4"
+    >
+      <GalaxyOrb kind={kind} color={color} size={104} hovered={hovered} />
+      <div className="text-center">
+        <p className="font-pixel text-[10px] uppercase tracking-widest text-white">
+          {title}
+        </p>
+        <p className="mt-1 font-pixel text-[8px] uppercase tracking-wider text-[var(--accent-purple)]">
+          EPOCH {year}
+        </p>
+      </div>
+    </motion.button>
   );
 }

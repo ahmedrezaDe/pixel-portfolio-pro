@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { getAudioLevels } from "@/lib/audio-analyser";
 
 type BurstEvent = { x: number; y: number; color: string; mass: number; timestamp: number } | null;
 
@@ -30,6 +31,14 @@ export function UniverseEngine({ burst, warpDirection = 'none' }: { burst: Burst
     let animationFrameId: number;
 
     const renderBg = () => {
+      const levels = getAudioLevels();
+      // Bass-driven boosts (gentle clamp)
+      const bass = Math.min(1, levels.bass * 1.2);
+      const overall = Math.min(1, levels.overall * 1.1);
+      const sizeBoost = 1 + bass * 1.8; // up to ~2.8x
+      const speedBoost = 1 + bass * 3.5;
+      const opacityBoost = overall * 0.45;
+
       ctx.fillStyle = "rgba(4, 4, 12, 0.4)";
       ctx.fillRect(0, 0, width, height);
 
@@ -45,7 +54,7 @@ export function UniverseEngine({ burst, warpDirection = 'none' }: { burst: Burst
           star.x -= (star.x - cx) * 0.03;
           star.y -= (star.y - cy) * 0.03;
         } else {
-          star.y -= star.speed; // Normal drift
+          star.y -= star.speed * speedBoost; // audio-reactive drift
         }
 
         star.opacity += Math.sin(Date.now() * star.pulseSpeed) * 0.01;
@@ -57,9 +66,10 @@ export function UniverseEngine({ burst, warpDirection = 'none' }: { burst: Burst
           if (warpDirection === 'none') star.y = height;
         }
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, Math.min(0.8, star.opacity))})`;
+        const alpha = Math.max(0.1, Math.min(1, star.opacity + opacityBoost));
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, star.size * sizeBoost, 0, Math.PI * 2);
         ctx.fill();
       });
       animationFrameId = requestAnimationFrame(renderBg);

@@ -102,8 +102,8 @@ export function Terminal() {
       }, 2200);
 
       setTimeout(() => {
-        toggleSecretTheme();
-        addXp(500, "void-breach");
+        window.dispatchEvent(new CustomEvent("void:encounter"));
+        addXp(120, "void-breach");
         sfx.levelUp(muted);
         setRunning(false);
       }, 3500);

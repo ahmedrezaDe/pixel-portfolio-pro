@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { GameProvider, useGame } from "@/lib/game-state";
 import TheVoidBattle from "@/components/TheVoidBattle";
+import { VoidEncounter } from "@/components/VoidEncounter";
 import { AudioPlayer } from '@/components/AudioPlayer'
 
 function NotFoundComponent() {
@@ -159,6 +160,7 @@ function RootInner() {
     <>
       <AudioPlayer />
       <Outlet />
+      <VoidEncounter />
       <TheVoidBattle
         open={secretTheme}
         onClose={toggleSecretTheme}
