@@ -23,20 +23,20 @@ const FRAGMENTS = [
 const AMALGAM = [
   "  ggg      mmm  ",
   " gg gg    mm mm ",
-  "gg  gg   mm  mm",
-  "g k ggmm k m",
-  "g kwk gm kwk m",
-  "gg  gmmgg  mmg",
+  "gg   gg  mm   mm",
+  "g  k  ggmm  k  m",
+  "g kwk  gm  kwk m",
+  "gg   gmmgg   mmg",
   " ggmmm    mmmgg ",
   "  gmkkkkkkkkmg  ",
-  " mgk w w wkgm  ",
+  " mgk w  w wkgm  ",
   " mg kkkkkkkk gm ",
-  " mgg      ggm  ",
-  "  m gg  gg m   ",
+  "  mgg      ggm  ",
+  "   m gg  gg m   ",
 ];
 
 // --- MAIN COMPONENT ---
-export default function VoidEncounter() {
+export function VoidEncounter() {
   // LOVABLE'S BRAIN
   const { addXp, sfx, muted } = useGame();
   const [open, setOpen] = useState(false);
@@ -47,7 +47,7 @@ export default function VoidEncounter() {
   const [floats, setFloats] = useState<FloatNum[]>([]);
   const [flash, setFlash] = useState(false);
   const [artifact, setArtifact] = useState<string | null>(null);
-  
+
   const idRef = useRef(0);
   const shake = useAnimationControls();
 
@@ -74,20 +74,20 @@ export default function VoidEncounter() {
 
   const spawnFloat = useCallback((value: number | string, color: string) => {
     const id = ++idRef.current;
-    const x = 30 + Math.random() * 40; 
+    const x = 30 + Math.random() * 40;
     const y = 30 + Math.random() * 20;
     setFloats((f) => [...f, { id, x, y, value, color }]);
     setTimeout(() => setFloats((f) => f.filter((n) => n.id !== id)), 1100);
   }, []);
 
   const triggerShake = useCallback((intensity = 10) => {
-      void shake.start({
-        x: [-intensity, intensity, -intensity * 0.6, intensity * 0.6, 0],
-        transition: { duration: 0.35 },
-      });
-      setFlash(true);
-      setTimeout(() => setFlash(false), 180);
-    }, [shake]
+    void shake.start({
+      x: [-intensity, intensity, -intensity * 0.6, intensity * 0.6, 0],
+      transition: { duration: 0.35 },
+    });
+    setFlash(true);
+    setTimeout(() => setFlash(false), 180);
+  }, [shake]
   );
 
   // ENEMY TURN AI
@@ -250,7 +250,7 @@ export default function VoidEncounter() {
 
           {/* BATTLEFIELD */}
           <div className="relative flex h-[calc(100%-260px)] w-full items-center justify-center z-20">
-            
+
             {/* Enemy HP */}
             <div className="absolute left-1/2 top-16 -translate-x-1/2">
               <div className="border-2 border-white bg-black/80 p-3" style={{ boxShadow: "4px 4px 0 #ff2bd6" }}>
@@ -296,7 +296,7 @@ export default function VoidEncounter() {
               <motion.div
                 initial={{ scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute border-4 border-white bg-black px-8 py-6 text-center z-50 shadow-2xl"
+                className="absolute border-4 border-white bg-black px-8 py-6 text-center z-50 shadow-2xl flex flex-col items-center"
                 style={{ boxShadow: phase === "win" ? "8px 8px 0 0 #39ff5f" : "8px 8px 0 0 #ff4d4d" }}
               >
                 <p className="font-pixel text-2xl uppercase tracking-widest" style={{ color: phase === "win" ? "#39ff5f" : "#ff4d4d" }}>
@@ -307,6 +307,13 @@ export default function VoidEncounter() {
                     ✦ ACQUIRED: {artifact} ✦
                   </p>
                 )}
+
+                <button
+                  onClick={close}
+                  className="mt-6 border-2 border-white/50 px-4 py-2 font-pixel text-[10px] uppercase tracking-widest text-white hover:bg-white/10 hover:border-white transition-colors"
+                >
+                  [ REBOOT SYSTEM ]
+                </button>
               </motion.div>
             )}
           </div>
@@ -399,13 +406,12 @@ function AttackButton({ label, sub, onClick, accent, disabled }: { label: string
     </button>
   );
 }
-
 function PixelMonster() {
   return (
     <motion.div
       animate={{ filter: ["hue-rotate(0deg)", "hue-rotate(40deg)", "hue-rotate(-30deg)", "hue-rotate(0deg)"] }}
       transition={{ filter: { duration: 2.4, repeat: Infinity, ease: "linear" } }}
-      className="relative scale-125 md:scale-150"
+      className="relative"
       style={{ imageRendering: "pixelated" }}
     >
       <div className="grid" style={{ gridTemplateColumns: `repeat(${AMALGAM[0].length}, 14px)`, gridTemplateRows: `repeat(${AMALGAM.length}, 14px)` }}>
