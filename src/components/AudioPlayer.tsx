@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { attachAnalyser, resumeAudioCtx } from "@/lib/audio-analyser";
 
 // The Playlist: You will drop these MP3 files into your `public/audio` folder.
 const PLAYLIST = [
@@ -33,13 +34,20 @@ export function AudioPlayer() {
 
   const currentTrack = PLAYLIST[trackIndex];
 
+  // Wire the analyser once the audio element exists
+  useEffect(() => {
+    if (audioRef.current) attachAnalyser(audioRef.current);
+  }, []);
+
   // Handle Play/Pause
   const togglePlay = () => {
     if (!audioRef.current) return;
+    attachAnalyser(audioRef.current);
+    resumeAudioCtx();
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      void audioRef.current.play();
     }
     setIsPlaying(!isPlaying);
   };

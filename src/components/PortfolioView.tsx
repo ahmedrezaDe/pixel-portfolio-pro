@@ -138,3 +138,39 @@ export function PortfolioView() {
     </LayoutGroup>
   );
 }
+
+function SectorOrb({
+  id,
+  color,
+  title,
+  year,
+  onSelect,
+}: {
+  id: string;
+  color: string;
+  title: string;
+  year: string | number;
+  onSelect: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const kind = SECTOR_KIND[id] ?? "spiral";
+  return (
+    <motion.button
+      onClick={onSelect}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={{ scale: 1.1 }}
+      className="group relative flex flex-col items-center gap-4"
+    >
+      <GalaxyOrb kind={kind} color={color} size={104} hovered={hovered} />
+      <div className="text-center">
+        <p className="font-pixel text-[10px] uppercase tracking-widest text-white">
+          {title}
+        </p>
+        <p className="mt-1 font-pixel text-[8px] uppercase tracking-wider text-[var(--accent-purple)]">
+          EPOCH {year}
+        </p>
+      </div>
+    </motion.button>
+  );
+}
