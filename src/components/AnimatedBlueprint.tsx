@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { portfolioConfig } from "@/lib/portfolioConfig";
 
 type Node = { id: string; label: string; x: number; y: number };
 type Edge = { source: string; target: string };
@@ -9,74 +10,22 @@ type BlueprintProps = {
   color?: string; 
 };
 
-// Handcrafted layouts for each project match their actual stack architectural patterns
-const BLUEPRINT_PRESETS: Record<string, { nodes: Node[]; edges: Edge[] }> = {
-  "tower-hunter": {
-    nodes: [
-      { id: "client", label: "HUD / REACT", x: 25, y: 30 },
-      { id: "core", label: "RUST CORE", x: 50, y: 50 },
-      { id: "db", label: "SQLITE", x: 75, y: 30 },
-      { id: "engine", label: "QUEST ENGINE", x: 70, y: 75 },
-      { id: "player", label: "PLAYER STATE", x: 25, y: 70 },
-    ],
-    edges: [
-      { source: "client", target: "core" },
-      { source: "core", target: "db" },
-      { source: "core", target: "engine" },
-      { source: "player", target: "client" },
-      { source: "player", target: "core" },
-    ],
-  },
-  "odyssey": {
-    nodes: [
-      { id: "n8n", label: "N8N WEBHOOKS", x: 20, y: 50 },
-      { id: "api", label: "FASTAPI BACKEND", x: 60, y: 50 },
-      { id: "llm", label: "GROQ LLM", x: 80, y: 30 },
-      { id: "crawler", label: "PLAYWRIGHT DOM", x: 80, y: 70 },
-    ],
-    edges: [
-      { source: "n8n", target: "api" },
-      { source: "api", target: "llm" },
-      { source: "api", target: "crawler" },
-      { source: "crawler", target: "api" },
-    ],
-  },
-  "orbit-commerce": {
-    nodes: [
-      { id: "gateway", label: "API GATEWAY", x: 20, y: 50 },
-      { id: "core", label: "SPRING BOOT CORE", x: 50, y: 30 },
-      { id: "cache", label: "REDIS LAYER", x: 50, y: 70 },
-      { id: "db", label: "POSTGRESQL POOL", x: 80, y: 50 },
-    ],
-    edges: [
-      { source: "gateway", target: "core" },
-      { source: "core", target: "cache" },
-      { source: "core", target: "db" },
-      { source: "cache", target: "db" },
-    ],
-  },
-  "unfinished": {
-    nodes: [
-      { id: "lab", label: "THE LAB", x: 20, y: 50 },
-      { id: "p1", label: "PROTO 01", x: 50, y: 25 },
-      { id: "p2", label: "PROTO 02", x: 50, y: 50 },
-      { id: "p3", label: "PROTO ??", x: 50, y: 75 },
-      { id: "ship", label: "SHIPPED", x: 80, y: 50 },
-    ],
-    edges: [
-      { source: "lab", target: "p1" },
-      { source: "lab", target: "p2" },
-      { source: "lab", target: "p3" },
-      { source: "p2", target: "ship" },
-    ],
-  },
-};
+// Blueprints come from portfolioConfig, so each diagram matches the project's real stack
+const BLUEPRINT_PRESETS: Record<string, { nodes: Node[]; edges: Edge[] }> = Object.fromEntries(
+  portfolioConfig.projects.map((p) => [
+    p.id,
+    {
+      nodes: p.blueprint.nodes.map((n) => ({ ...n, label: n.label.toUpperCase() })),
+      edges: p.blueprint.edges.map((e) => ({ source: e.from, target: e.to })),
+    },
+  ]),
+);
 
 export function AnimatedBlueprint({ projectId, color = "#4a9eff" }: BlueprintProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Fallback to tower-hunter preset if the ID doesn't exactly match
-  const preset = BLUEPRINT_PRESETS[projectId] || BLUEPRINT_PRESETS["tower-hunter"];
+  // Fall back to the first project if the ID doesn't match
+  const preset = BLUEPRINT_PRESETS[projectId] || Object.values(BLUEPRINT_PRESETS)[0];
 
   useEffect(() => {
     // Small delay ensures the animation kicks off cleanly after the bloom finishes morphing

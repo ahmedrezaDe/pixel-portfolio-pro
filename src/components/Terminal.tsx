@@ -50,8 +50,8 @@ export function Terminal() {
     }
 
     if (cmd === "run project" || cmd === "run") return simulateLog(T.runProjectLog);
-    if (cmd === "run-scraper") return simulateLog(T.runScraperLog);
-    if (cmd === "system-check") return simulateLog(T.systemCheckLog);
+    if (cmd === "run-thermal") return simulateLog(T.runScraperLog);
+    if (cmd === "run-telemetry") return simulateLog(T.systemCheckLog);
 
     if (cmd === "reset") {
       setRunning(true);
