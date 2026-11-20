@@ -366,8 +366,8 @@ export const portfolioConfig: PortfolioConfig = {
       "[fault] cooling degradation  max 38.0°C",
       "[fault] compute spike        max 43.6°C",
       "$ python src/anomaly_detection.py",
-      "[iso]   compute spike recall 0.87 ........... caught",
-      "[iso]   slow cooling loss ................... hard to detect",
+      "[iso]   compute spike recall 1.00 ........... caught",
+      "[iso]   cooling loss recall 0.04 ............ missed",
       "[note]  unusual ≠ slowly degrading. lesson learned.",
     ],
     systemCheckLog: [
